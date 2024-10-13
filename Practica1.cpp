@@ -224,44 +224,60 @@ string unwrap_string(string str) {
 }
 
 void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>& rasp, List<string>& posl, List<List<string>>& old_formed, HashTable<List<string>>& tables) {
-    filesystem::path  dirPath = ".";
+    filesystem::path dirPath = ".";
 
     for (int k = 0; k < from_tables.length; k++) {
+        // Получаем имя таблицы
+        string current_table = from_tables[k];
 
-        List<List<string>> formed;
-
-        for (int j = 0; j < rasp.Get(from_tables[k]).length; j++) {
-            string to_posl = from_tables[k] + '.' + rasp.Get(from_tables[k])[j];
-            posl.push(to_posl);
-
-            List<List<string>> geted;
-
-            readFromCsv(dirPath / schem_name / from_tables[k] / "1.csv", geted, from_tables[k], schem_name);
-
-            int index = tables.Get(from_tables[k]).find(rasp.Get(from_tables[k])[j]);
-
-            List<List<string>> newFromed;
-
-
-
-            double_clear(formed);
-            formed = newFromed;
-
-            double_clear(geted);
+        // Проверяем наличие колонок для текущей таблицы
+        if (rasp.Get(current_table).length == 0) {
+            cout << "Таблица " << current_table << " не содержит колонок." << endl;
+            continue;
         }
 
-        if (old_formed.length >= formed.length) {
-            cross_joint(old_formed, formed);
-            double_clear(formed);
+        List<List<string>> formed; // Создаем пустой список для новой таблицы
+
+        for (int j = 0; j < rasp.Get(current_table).length; j++) {
+            // Создаем имя для столбца
+            string to_posl = current_table + '.' + rasp.Get(current_table)[j];
+            posl.push(to_posl); // Добавляем колонку в список
         }
-        else {
-            cross_joint(formed, old_formed);
-            double_clear(old_formed);
+
+        List<List<string>> geted; // Место для хранения данных из CSV
+        string csv_path = (dirPath / schem_name / current_table / "1.csv").string();
+
+        // Чтение данных из CSV
+        if (!readFromCsv(csv_path, geted, current_table, schem_name)) {
+            cout << "Не удалось прочитать CSV для таблицы: " << current_table << endl;
+            continue;
+        }
+
+        // Проверка корректности индексов колонок
+        int index = tables.Get(current_table).find(rasp.Get(current_table)[0]);
+        if (index == -1) {
+            cout << "Колонка " << rasp.Get(current_table)[0] << " не найдена в таблице " << current_table << endl;
+            continue;
+        }
+
+        // Если таблица не пуста, копируем данные
+        formed = geted; 
+
+        // Объединяем данные новой таблицы с уже существующими в old_formed
+        if (old_formed.length == 0) {
+            // Если old_formed пуст, то просто копируем туда formed
             old_formed = formed;
+        } else {
+            // Если old_formed содержит данные, объединяем их с formed
+            cross_joint(old_formed, formed);
         }
-    }
 
+        // Освобождаем память от временных данных
+        double_clear(formed);
+        double_clear(geted);
+    }
 }
+
 
 void where_select(string& line, int& i, string& logi, List<string>& posl, List<List<string>>& old_formed, List<bool>& cmp) {
     while (logi != "") {
