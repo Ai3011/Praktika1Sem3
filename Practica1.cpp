@@ -2,7 +2,6 @@
 #include <iostream>
 #include <filesystem>
 #include <stdexcept>
-#include <direct.h>
 #include <fstream>
 #include "Struct.h"
 #include "parseJS.h"
