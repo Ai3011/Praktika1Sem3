@@ -187,6 +187,14 @@ void printRows(List<List<string>>& to_print) {
     }
 }
 
+void printMenu() {
+    cout << "Доступные команды:" << endl;
+    cout << "1. SELECT - выбрать данные" << endl;
+    cout << "2. INSERT - вставить данные" << endl;
+    cout << "3. DELETE - удалить данные" << endl;
+    cout << "4. END - завершить работу" << endl;
+}
+
 void printFilteredRows(List<List<string>>& to_print, List<bool>& cmp) {
     for (int i = 0; i < to_print.length; i++) {
         if (!cmp[i]) continue;
@@ -466,6 +474,8 @@ void console_parse(string& schem_name, HashTable<List<string>>& tables, List<str
     filesystem::path dirPath = ".";
     string line;
     bool ended = true;
+
+    printMenu(); // выводим меню команд
 
     while (ended) {
         try {
