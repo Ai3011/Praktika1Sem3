@@ -248,10 +248,7 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
         string csv_path = (dirPath / schem_name / current_table / "1.csv").string();
 
         // Чтение данных из CSV
-        if (!readFromCsv(csv_path, geted, current_table, schem_name)) {
-            cout << "Не удалось прочитать CSV для таблицы: " << current_table << endl;
-            continue;
-        }
+        readFromCsv(csv_path, geted, current_table, schem_name);
 
         // Проверка корректности индексов колонок
         int index = tables.Get(current_table).find(rasp.Get(current_table)[0]);
@@ -277,6 +274,7 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
         double_clear(geted);
     }
 }
+
 
 
 void where_select(string& line, int& i, string& logi, List<string>& posl, List<List<string>>& old_formed, List<bool>& cmp) {
