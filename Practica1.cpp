@@ -276,50 +276,36 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
 }
 
 void where_select(string& line, int& i, string& logi, List<string>& posl, List<List<string>>& old_formed, List<bool>& cmp) {
-    if (logi.empty()) {
-        logi = take_string(line, i); // Получаем первый логический оператор
-    }
-
-    while (!logi.empty()) {
+    while (logi != "") {
         string first = take_string(line, i);
         string op = take_string(line, i);
         if (op != "=") throw runtime_error("Invalid operator");
-
         string second = take_string(line, i);
+
         if (posl.find(first) == -1) first = unwrap_string(first);
         if (posl.find(second) == -1) second = unwrap_string(second);
 
-        int index_first = posl.find(first);
-        int index_second = posl.find(second);
+        int sod_first = posl.find(first);
+        int sod_second = posl.find(second);
 
-        // Проверка наличия индексов
-        if (index_first == -1 || index_second == -1) {
-            throw runtime_error("Column not found in position list");
-        }
+        List<bool> cmp_new;
 
-        List<bool> cmp_new(old_formed.length, false);
 
-        // Сравнение значений для cmp_new
-        for (int j = 0; j < old_formed.length; j++) {
-            if (old_formed[j][index_first] == old_formed[j][index_second]) {
-                cmp_new[j] = true;
-            }
-        }
 
-        List<bool> cmp_res(old_formed.length, false);
+
+        List<bool> cmp_res;
+
         for (int j = 0; j < cmp.length; j++) {
-            if (logi == "AND") {
-                cmp_res[j] = cmp[j] && cmp_new[j];
-            } else if (logi == "OR") {
-                cmp_res[j] = cmp[j] || cmp_new[j];
-            } else {
-                throw runtime_error("Invalid logical operator");
-            }
+            if (logi == "AND") cmp_res.push(cmp[j] && cmp_new[j]);
+            else if (logi == "OR") cmp_res.push(cmp[j] || cmp_new[j]);
+            else throw runtime_error("Invalid logick");
         }
 
+        cmp.clear();
+        cmp_new.clear();
         cmp = cmp_res;
 
-        logi = take_string(line, i); // Получаем следующий логический оператор
+        logi = take_string(line, i);
     }
 }
 
