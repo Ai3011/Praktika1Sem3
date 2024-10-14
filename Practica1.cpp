@@ -9,7 +9,25 @@
 
 using namespace std;
 
-void printRows(List<List<string>>& to_print);
+// Функция для вывода меню с описанием синтаксиса команд
+void showMenu() {
+    cout << "Доступные команды:" << endl;
+    cout << "1. SELECT: Выполняет выборку данных." << endl;
+    cout << "   Синтаксис: SELECT <table_name.column_name, ...> FROM <table_name, ...> [WHERE condition] [AND/OR condition]" << endl;
+    cout << endl;
+
+    cout << "2. INSERT: Вставляет новые данные в таблицу." << endl;
+    cout << "   Синтаксис: INSERT INTO <table-name> VALUES ('value1', 'value2', ...);" << endl;
+    cout << endl;
+
+    cout << "3. DELETE: Удаляет данные из таблицы." << endl;
+    cout << "   Синтаксис: DELETE FROM <table_name> [WHERE condition] [AND/OR condition];" << endl;
+    cout << endl;
+
+    cout << "4. END: Завершает работу программы." << endl;
+    cout << endl;
+}
+
 
 void setPrimaryKeyFile(const filesystem::path& directory, const std::string& tableName, int key) {
     
