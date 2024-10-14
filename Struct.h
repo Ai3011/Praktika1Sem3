@@ -2,165 +2,173 @@
 
 using namespace std;
 
+// Узел для двусвязного списка
 template <typename T>
-struct NodeD{
-    T data;
-    NodeD* next = nullptr;
-    NodeD* prev = nullptr;
+struct NodeD {
+    T data;                // Хранимые данные
+    NodeD* next = nullptr;  // Указатель на следующий элемент
+    NodeD* prev = nullptr;  // Указатель на предыдущий элемент
 };
 
+// Двусвязный список
 template <typename T>
-struct List{
-    int length = 0;
-    NodeD<T>* head = new NodeD<T>;
-    NodeD<T>* tail = head;
+struct List {
+    int length = 0;                  // Количество элементов в списке
+    NodeD<T>* head = new NodeD<T>;    // Указатель на первый элемент (фиктивный узел)
+    NodeD<T>* tail = head;            // Указатель на последний элемент
 
-    void push(T data){
-        NodeD<T>* new_node = new NodeD<T>{data, nullptr, tail};
-        tail -> next = new_node;
-        tail = new_node;
-        length += 1;
+    // Добавление элемента в конец списка
+    void push(T data) {
+        NodeD<T>* new_node = new NodeD<T>{data, nullptr, tail};  // Создаем новый узел
+        tail->next = new_node;   // Связываем предыдущий элемент с новым
+        tail = new_node;         // Обновляем указатель на последний элемент
+        length += 1;             // Увеличиваем длину списка
     }
 
-    T operator[](int index){
-        return get(index);
+    // Перегрузка оператора [], возвращает элемент по индексу
+    T operator[](int index) {
+        return get(index);  // Используем метод get для доступа
     }
 
-    T pop(){
+    // Удаление последнего элемента и возврат его данных
+    T pop() {
         if (length == 0) {
-            throw runtime_error("List is empty");
+            throw runtime_error("List is empty");  // Ошибка, если список пуст
         }
 
-        NodeD<T>* last = tail;
+        NodeD<T>* last = tail;  // Последний узел
+        T data = last->data;    // Данные последнего узла
+        tail->prev->next = nullptr;  // Обнуляем указатель next у предпоследнего узла
+        tail = tail->prev;           // Обновляем tail на предыдущий узел
+        length--;                    // Уменьшаем длину списка
 
-        T data = last -> data;
-        tail -> prev -> next = nullptr;
-        tail = tail -> prev;
-
-        length --;
-
-        delete last;
+        delete last;  // Удаляем последний узел
         return data;
     }
 
-    T get(int index){
+    // Получение элемента по индексу
+    T get(int index) {
         if (index >= length || index < 0) {
-            throw runtime_error("Out of range");
+            throw runtime_error("Out of range");  // Ошибка, если индекс выходит за пределы
         }
 
-        NodeD<T>* tek = head -> next;
-        while (index != 0){
-            tek = tek -> next;
-            index --;
+        NodeD<T>* tek = head->next;  // Начинаем с первого реального узла
+        while (index != 0) {
+            tek = tek->next;  // Идем по списку
+            index--;
         }
-        return tek -> data;
+        return tek->data;  // Возвращаем данные
     }
 
-    int find(T data){
-        
-        for (int index = 0; index < length; index++){
-            if (get(index) == data){
-                return index;
+    // Поиск элемента и возврат его индекса
+    int find(T data) {
+        for (int index = 0; index < length; index++) {
+            if (get(index) == data) {
+                return index;  // Возвращаем индекс найденного элемента
             }
         }
-
-        return -1;
+        return -1;  // Если элемент не найден
     }
 
-    void del(int index){
+    // Удаление элемента по индексу
+    void del(int index) {
         if (index >= length || index < 0) {
-            throw runtime_error("Out of range");
+            throw runtime_error("Out of range");  // Ошибка, если индекс некорректный
         }
         if (index == length - 1) {
-            pop();
+            pop();  // Если удаляется последний элемент, используем pop
+            return;
         }
 
-        NodeD<T>* tek = head -> next;
-        while (index != 0){
-            tek = tek -> next;
-            index --;
+        NodeD<T>* tek = head->next;
+        while (index != 0) {
+            tek = tek->next;
+            index--;
         }
 
-        NodeD<T>* pred = tek -> prev;
-        pred -> next = tek -> next;
-        pred -> next -> prev = pred;
+        NodeD<T>* pred = tek->prev;  // Предыдущий узел
+        pred->next = tek->next;      // Обновляем связи
+        if (tek->next) {
+            tek->next->prev = pred;  // Обновляем обратную связь
+        }
 
-        delete tek;
-        length --;
-
+        delete tek;  // Удаляем узел
+        length--;
     }
 
-    void remove(T data){
+    // Удаление элемента по значению
+    void remove(T data) {
         int index = find(data);
-
-        if(index == -1) {
-            throw runtime_error("No value");
+        if (index == -1) {
+            throw runtime_error("No value");  // Ошибка, если элемента нет в списке
         }
-        del(index);
+        del(index);  // Удаляем элемент по индексу
     }
 
-    void insert(T data, int index){
+    // Вставка элемента в список по индексу
+    void insert(T data, int index) {
         if (index > length || index < 0) {
-            throw runtime_error("Out of range");
+            throw runtime_error("Out of range");  // Ошибка, если индекс некорректный
         }
-        if (index == length){
-            push(data);
-        } else if (index >= 0){
-            NodeD<T>* new_node = new NodeD<T>;
-            new_node -> data = data;
-            NodeD<T>* tek = head -> next;
+        if (index == length) {
+            push(data);  // Если индекс в конце, добавляем элемент
+        } else {
+            NodeD<T>* new_node = new NodeD<T>{data};
+            NodeD<T>* tek = head->next;
 
-            while (index != 0){
-                tek = tek -> next;
-                index --;
+            while (index != 0) {
+                tek = tek->next;
+                index--;
             }
 
-            new_node -> prev = tek -> prev;
-            tek -> prev -> next = new_node;
-            tek -> prev = new_node;
-            new_node -> next = tek;
+            new_node->prev = tek->prev;
+            tek->prev->next = new_node;
+            tek->prev = new_node;
+            new_node->next = tek;
             length++;
         }
-
     }
 
-    void clear(){
+    // Очистка списка
+    void clear() {
         NodeD<T>* prev;
         NodeD<T>* tek = tail;
-        while (tek != head){
-            prev = tek ->prev;
+        while (tek != head) {
+            prev = tek->prev;
             delete tek;
             tek = prev;
         }
-        delete tek;
+        delete tek;  // Удаляем фиктивный узел
     }
 };
 
-
+// Одномерный массив
 template <typename T>
-struct Array{
-
-    struct Node{
+struct Array {
+    struct Node {
         T value;
-        bool state = false;
+        bool state = false;  // Состояние: занято или нет
     };
     int arSize;
     Node* head;
 
-    Array(int size){
+    // Конструктор массива
+    Array(int size) {
         arSize = size;
         head = new Node[size];
     }
 
-    void set(T data, int index){
+    // Установка значения по индексу
+    void set(T data, int index) {
         if (index >= arSize) {
-            throw runtime_error("Out of range");
+            throw runtime_error("Out of range");  // Ошибка, если индекс некорректный
         }
         head[index].value = data;
-        head[index].state = true;
+        head[index].state = true;  // Устанавливаем флаг, что элемент активен
     }
 
-    T operator[](int index){
+    // Перегрузка оператора [], получение значения по индексу
+    T operator[](int index) {
         if (index >= arSize) {
             throw runtime_error("Out of range");
         }
@@ -170,101 +178,108 @@ struct Array{
         return head[index].value;
     }
 
-    void del(int index){
+    // Удаление значения по индексу
+    void del(int index) {
         if (index >= arSize) {
             throw runtime_error("Out of range");
         }
         if (!head[index].state) {
             throw runtime_error("No value");
         }
-        head[index].state = false;
+        head[index].state = false;  // Сбрасываем флаг активности
     }
 
-    int find(T data){
-        for (int i = 0; i < arSize; i++){
-            if(!head[i].state) {
+    // Поиск элемента
+    int find(T data) {
+        for (int i = 0; i < arSize; i++) {
+            if (!head[i].state) {
                 continue;
             }
 
-            if(head[i].value == data){
-                return i;
+            if (head[i].value == data) {
+                return i;  // Возвращаем индекс найденного элемента
             }
         }
 
-        return -1;
+        return -1;  // Если элемент не найден
     }
 
-    void remove(T data){
+    // Удаление элемента по значению
+    void remove(T data) {
         int index = find(data);
-        if  (index == -1) {
+        if (index == -1) {
             throw runtime_error("No value");
         }
         head[index].state = false;
     }
 
-    ~Array(){
+    // Деструктор массива
+    ~Array() {
         delete[] head;
     }
-
 };
 
+// Узел хеш-таблицы
 template <typename T>
-struct NodeH{
+struct NodeH {
     string key;
     T value;
-    bool state = false;
-    bool deleted = false;
+    bool state = false;  // Состояние: занято или нет
+    bool deleted = false;  // Флаг, указывающий на удаление
 };
 
-
+// Хеш-таблица
 template <typename T>
-struct HashTable{
-
+struct HashTable {
     int size = 8;
+    NodeH<T>* arr = new NodeH<T>[size];  // Массив узлов хеш-таблицы
 
-    NodeH<T>* arr = new NodeH<T>[size];
-
-    ~HashTable(){
-        delete [] arr;
+    // Деструктор хеш-таблицы
+    ~HashTable() {
+        delete[] arr;
     }
 
-    int hashFunc(string key){
+    // Хеш-функция для строк
+    int hashFunc(string key) {
         int hash_result = 0;
-        for (int i = 0; i < key.size(); i++){
+        for (int i = 0; i < key.size(); i++) {
             hash_result = ((size - 1) * hash_result + key[i]) % size;
             hash_result = (hash_result * 2 + 1) % size;
         }
         return hash_result;
     }
 
-    void Add(string key, T value){
+    // Добавление ключа и значения в таблицу
+    void Add(string key, T value) {
         int index = hashFunc(key);
-        
-        while (index < size){
-            if (!arr[index].state){
+
+        while (index < size) {
+            if (!arr[index].state) {
                 arr[index].key = key;
                 arr[index].value = value;
                 arr[index].state = true;
                 return;
-            } else if(arr[index].key == key){
-                arr[index].value = value;
+            } else if (arr[index].key == key) {
+                arr[index].value = value;  // Обновляем значение, если ключ уже существует
                 return;
             }
             index++;
         }
 
-        Resize();
-        Add(key, value);
+        Resize();  // Увеличиваем размер таблицы при необходимости
+        Add(key, value);  // Повторяем вставку
     }
 
-    void Resize(){
+    // Изменение размера таблицы (рехеширование)
+    void Resize() {
         size *= 2;
         NodeH<T>* oldArr = arr;
 
         arr = new NodeH<T>[size];
 
-        for(int i = 0; i < size / 2; i++){
-            if (oldArr[i].state && !oldArr[i].deleted){
+        // Переносим элементы из старой таблицы в новую
+        for (int i = 0; i < size / 2; i++) {
+            if (oldArr[i].state && !oldArr[i].deleted) {
                 Add(oldArr[i].key, oldArr[i].value);
             }
         }
@@ -272,15 +287,16 @@ struct HashTable{
         delete[] oldArr;
     }
 
-    T Get(string key){
+    // Получение значения по ключу
+    T Get(string key) {
         int index = hashFunc(key);
-        
-        while (index < size){
-            if (arr[index].state && arr[index].key == key){
+
+        while (index < size) {
+            if (arr[index].state && arr[index].key == key) {
                 return arr[index].value;
             } else if (arr[index].key == key && arr[index].deleted) {
                 throw runtime_error("No such key");
-            }else if (!arr[index].deleted && !arr[index].state) {
+            } else if (!arr[index].deleted && !arr[index].state) {
                 throw runtime_error("No such key");
             }
             index++;
@@ -289,19 +305,20 @@ struct HashTable{
         throw runtime_error("No such key");
     }
 
-    void Remove(string key){
+    // Удаление элемента по ключу
+    void Remove(string key) {
         int index = hashFunc(key);
-        while (index < size){
-            if (arr[index].state && arr[index].key == key){
+        while (index < size) {
+            if (arr[index].state && arr[index].key == key) {
                 if (is_same<T, List<string>>::value) {
-                    arr[index].value.clear();
+                    arr[index].value.clear();  // Очистка списка, если это список
                 }
                 arr[index].state = false;
                 arr[index].deleted = true;
                 return;
-            }else if (arr[index].key == key && arr[index].deleted) {
+            } else if (arr[index].key == key && arr[index].deleted) {
                 throw runtime_error("No such key");
-            }else if (!arr[index].deleted && !arr[index].state) {
+            } else if (!arr[index].deleted && !arr[index].state) {
                 throw runtime_error("No such key");
             }
             index++;
