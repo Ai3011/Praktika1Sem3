@@ -4,6 +4,7 @@
 #include <fstream>
 #include "structures.h"
 #include "json_parse.h"
+#include "db_operations.h"
 #include "csv.h"
 
 
