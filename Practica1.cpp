@@ -4,7 +4,6 @@
 #include <fstream>
 #include "structures.h"
 #include "json_parse.h"
-#include "db_operations.h"
 #include "csv.h"
 
 
@@ -18,7 +17,7 @@ void showMenu() {
     cout << endl;
 
     cout << "2. INSERT: Вставляет новые данные в таблицу." << endl;
-    cout << "   Синтаксис: INSERT INTO <table-name> VALUES ('value1', 'value2', ...);" << endl;
+    cout << "   Синтаксис: INSERT INTO <table-nagme> VALUES ('value1', 'value2', ...);" << endl;
     cout << endl;
 
     cout << "3. DELETE: Удаляет данные из таблицы." << endl;
@@ -560,6 +559,8 @@ void console_parse(string& schem_name, HashTable<List<string>>& tables, List<str
     filesystem::path dirPath = ".";
     string line;
     bool ended = true;
+
+    showMenu();
 
     while (ended){
         try{
