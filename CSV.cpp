@@ -15,7 +15,7 @@ void lock(const filesystem::path& directory, const std::string tableName) {
 }
 
 // Функция разблокировки таблицы. Создает файл с именем tableName + "_lock" и записывает туда значение 1.
-void unlock(const filesystem::path& directory, const std::string tableName) {
+void unlock(const filesystem::path& directory, const string tableName) {
     filesystem::path filePath = directory / (tableName + "_lock");
 
     ofstream file(filePath, ios::out | ios::trunc);  // Открываем файл для записи, очищаем содержимое
@@ -24,7 +24,7 @@ void unlock(const filesystem::path& directory, const std::string tableName) {
 }
 
 // Функция проверки, разблокирована ли таблица. Возвращает 1, если таблица разблокирована, 0 — если заблокирована.
-int isunlocked(const filesystem::path& directory, const std::string& tableName) {
+int isunlocked(const filesystem::path& directory, const string& tableName) {
     filesystem::path filePath = directory / (tableName + "_lock");
 
     ifstream file(filePath);  // Открываем файл для чтения
