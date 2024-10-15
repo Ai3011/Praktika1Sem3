@@ -48,10 +48,10 @@ void printFilteredRows(List<List<string>>& to_print, List<bool>& cmp);
 string unwrap_string(string str);
 
 // Формирование данных из таблиц в зависимости от выбранных столбцов
-void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>& rasp, List<string>& posl, List<List<string>>& old_formed, HashTable<List<string>>& tables);
+void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>& rasp, List<string>& posl, List<List<string>>& new_formed, HashTable<List<string>>& tables);
 
 // Обработка оператора WHERE для фильтрации данных
-void where_select(string& line, int& i, string& logi, List<string>& posl, List<List<string>>& old_formed, List<bool>& cmp);
+void where_select(string& line, int& i, string& logOperator, List<string>& posl, List<List<string>>& new_formed, List<bool>& cmp);
 
 // Выполнение запроса SELECT
 void select(string& line, int& i, string& schem_name, HashTable<List<string>>& tables);
@@ -158,7 +158,7 @@ void get_names(string& line, int& i, List<string>& selected_tables, List<string>
     while (more) {
         string name; // Переменная для хранения имени таблицы
         string column; // Переменная для хранения имени колонки
-        bool geted_name = false; // Флаг для отслеживания, извлекаем ли имя или колонку
+        bool geted_name = false; // состояние для отслеживания, извлекаем ли имя или колонку
 
         // Проверяем, не вышли ли за пределы строки
         if (i > line.length()) {
@@ -264,7 +264,9 @@ void double_clear(List<List<string>>& formed) {
 // Функция для выполнения перекрестного соединения двух списков
 void cross_joint(List<List<string>>& itog, List<List<string>>& pred) {
     // Если предшествующий список пуст, выходим из функции
-    if (pred.length == 0) return;
+    if (pred.length == 0) {
+        return;
+    }
 
     List<List<string>> res; // Список для хранения результатов
 
@@ -279,8 +281,8 @@ void cross_joint(List<List<string>>& itog, List<List<string>>& pred) {
             copyList(geted, prom1); // Копируем текущий элемент в prom1
 
             // Добавляем все элементы из текущего элемента pred в prom1
-            for (int o = 0; o < pred[j].length; o++) {
-                prom1.push(pred[j][o]);
+            for (int z = 0; z < pred[j].length; z++) {
+                prom1.push(pred[j][z]);
             }
 
             res.push(prom1); // Добавляем промышленные результаты в итоговый список
@@ -361,7 +363,7 @@ string unwrap_string(string str) {
     throw runtime_error("Invalid argument"); // Если кавычка не найдена, выбрасываем исключение
 }
 // Функция для формирования данных на основе заданных таблиц
-void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>& rasp, List<string>& posl, List<List<string>>& old_formed, HashTable<List<string>>& tables) {
+void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>& rasp, List<string>& posl, List<List<string>>& new_formed, HashTable<List<string>>& tables) {
     filesystem::path dirPath = "."; // Путь к директории
 
     // Проходим по всем таблицам, из которых будет формироваться результат
@@ -371,7 +373,7 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
 
         // Проходим по всем полям текущей таблицы
         for (int j = 0; j < rasp.Get(from_tables[k]).length; j++) {
-            // Формируем имя поля в формате "таблица.поле"
+            // Формируем имя поля в формате "таблица.поле"aa
             string to_posl = from_tables[k] + '.' + rasp.Get(from_tables[k])[j];
             posl.push(to_posl); // Добавляем это поле в список полей
             
@@ -386,17 +388,17 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
             List<List<string>> newFromed; // Новый список для хранения сформированных данных
 
             // Проходим по всем прочитанным строкам (кроме заголовка)
-            for (int o = 0; o < geted.length - 1; o++) {
+            for (int z = 0; z < geted.length - 1; z++) {
                 List<string> formedRow; // Строка для хранения сформированных данных
 
                 // Если сформированные данные уже существуют, копируем их
-                if (formed.length > o) {
-                    List<string> preFormed = formed[o];
+                if (formed.length > z) {
+                    List<string> preFormed = formed[z];
                     copyList(preFormed, formedRow);
                 }
 
                 // Добавляем значение текущего поля к сформированной строке
-                formedRow.push(geted[o + 1][index]);
+                formedRow.push(geted[z + 1][index]);
                 newFromed.push(formedRow); // Добавляем сформированную строку в новый список
             }
 
@@ -409,21 +411,21 @@ void form(string& schem_name, List<string>& from_tables, HashTable<List<string>>
         }
 
         // Проверяем, какие данные сформировались и объединяем с предыдущими
-        if (old_formed.length >= formed.length) {
-            cross_joint(old_formed, formed); // Объединяем данные
+        if (new_formed.length >= formed.length) {
+            cross_joint(new_formed, formed); // Объединяем данные
             double_clear(formed); // Очищаем новые сформированные данные
         } else {
-            cross_joint(formed, old_formed); // Объединяем данные
-            double_clear(old_formed); // Очищаем предыдущие данные
-            old_formed = formed; // Обновляем старые данные
+            cross_joint(formed, new_formed); // Объединяем данные
+            double_clear(new_formed); // Очищаем предыдущие данные
+            new_formed = formed; // Обновляем старые данные
         }
     }
 }
 
-// Функция для обработки условий WHERE в SQL-подобных запросах
-void where_select(string& line, int& i, string& logi, List<string>& posl, List<List<string>>& old_formed, List<bool>& cmp) {
+// Функция для обработки условий WHERE 
+void where_select(string& line, int& i, string& logOperator, List<string>& posl, List<List<string>>& new_formed, List<bool>& cmp) {
     // Пока есть логический оператор
-    while (logi != "") {
+    while (logOperator != "") {
         string first = take_string(line, i); // Получаем первое значение
         string op = take_string(line, i); // Получаем оператор
         if (op != "=") {
@@ -446,16 +448,16 @@ void where_select(string& line, int& i, string& logi, List<string>& posl, List<L
         List<bool> cmp_new; // Новый список для хранения результатов сравнения
 
         // Проходим по всем сформированным данным
-        for (int j = 0; j < old_formed.length; j++) {
+        for (int j = 0; j < new_formed.length; j++) {
             string sr_first = first;
             string sr_second = second;
 
             // Если значение найдено в списке полей, берем его из сформированных данных
             if (sod_first != -1) {
-                sr_first = old_formed[j][sod_first];
+                sr_first = new_formed[j][sod_first];
             }
             if (sod_second != -1) {
-                sr_second = old_formed[j][sod_second];
+                sr_second = new_formed[j][sod_second];
             }
             // Сравниваем значения и добавляем результат в новый список
             cmp_new.push(sr_first == sr_second);
@@ -465,9 +467,9 @@ void where_select(string& line, int& i, string& logi, List<string>& posl, List<L
 
         // Обрабатываем логические операции
         for (int j = 0; j < cmp.length; j++) {
-            if (logi == "AND") {
+            if (logOperator == "AND") {
                 cmp_res.push(cmp[j] && cmp_new[j]); // Если оператор AND, выполняем логическое И
-            } else if (logi == "OR") {
+            } else if (logOperator == "OR") {
                 cmp_res.push(cmp[j] || cmp_new[j]); // Если оператор OR, выполняем логическое ИЛИ
             } else {
                 throw runtime_error("Invalid logick"); // Проверяем на корректность логического оператора
@@ -479,7 +481,7 @@ void where_select(string& line, int& i, string& logi, List<string>& posl, List<L
         cmp_new.clear();
         cmp = cmp_res;
 
-        logi = take_string(line, i); // Получаем следующий логический оператор
+        logOperator = take_string(line, i); // Получаем следующий логический оператор
     }
 }
 // Функция для выполнения SQL-подобного запроса SELECT
@@ -507,11 +509,11 @@ void select(string& line, int& i, string& schem_name, HashTable<List<string>>& t
     HashTable<List<string>> rasp; // Хеш-таблица для хранения выбранных колонок для каждой таблицы
 
     // Заполняем хеш-таблицу
-    for (int o = 0; o < from_tables.length; o++) {
+    for (int z = 0; z < from_tables.length; z++) {
         List<string> forRasp; // Список для хранения колонок текущей таблицы
         for (int j = 0; j < selected_tables.length; j++) {
             // Если выбранная таблица совпадает с текущей
-            if (selected_tables[j] == from_tables[o]) {
+            if (selected_tables[j] == from_tables[z]) {
                 // Проверяем, что колонка еще не была добавлена
                 if (forRasp.find(selected_columns[j]) != -1) {
                     throw runtime_error("Wrong syntax"); // Если колонка уже есть, выбрасываем исключение
@@ -519,29 +521,29 @@ void select(string& line, int& i, string& schem_name, HashTable<List<string>>& t
                 forRasp.push(selected_columns[j]); // Добавляем колонку в список
             }
         }
-        rasp.Add(from_tables[o], forRasp); // Добавляем список колонок в хеш-таблицу
+        rasp.Add(from_tables[z], forRasp); // Добавляем список колонок в хеш-таблицу
     }
 
-    List<List<string>> old_formed; // Список для хранения сформированных данных
+    List<List<string>> new_formed; // Список для хранения сформированных данных
     List<string> posl; // Список для хранения имен колонок
 
     // Формируем данные из выбранных таблиц
-    form(schem_name, from_tables, rasp, posl, old_formed, tables);
+    form(schem_name, from_tables, rasp, posl, new_formed, tables);
 
     com = take_string(line, i); // Получаем следующее слово
-    string logi = "AND"; // Логический оператор по умолчанию
+    string logOperator = "AND"; // Логический оператор по умолчанию
 
     List<bool> cmp; // Список для хранения результатов условий
-    for (int j = 0; j < old_formed.length; j++) {
+    for (int j = 0; j < new_formed.length; j++) {
         cmp.push(true); // Изначально все строки считаем подходящими
     }
 
     // Проверяем, есть ли условия WHERE
     if (com == "WHERE") {
-        where_select(line, i, logi, posl, old_formed, cmp); // Обрабатываем условия
+        where_select(line, i, logOperator, posl, new_formed, cmp); // Обрабатываем условия
     }
 
-    printFilteredRows(old_formed, cmp); // Печатаем отфильтрованные строки
+    printFilteredRows(new_formed, cmp); // Печатаем отфильтрованные строки
     
     // Очищаем временные данные
     selected_tables.clear();
@@ -554,7 +556,7 @@ void select(string& line, int& i, string& schem_name, HashTable<List<string>>& t
 
     from_tables.clear(); // Очищаем список таблиц
     posl.clear(); // Очищаем список колонок
-    double_clear(old_formed); // Очищаем сформированные данные
+    double_clear(new_formed); // Очищаем сформированные данные
 }
 
 // Функция для получения содержимого списка из строки
@@ -584,7 +586,7 @@ string take_list(string& cont, int& index) {
     return content; // Возвращаем собранное содержимое
 }
 
-// Функция для выполнения SQL-подобного запроса INSERT
+// Функция для выполнения запроса INSERT
 void insert(string& line, int& i, HashTable<List<string>>& tables, string& schem_name, int& limit) {
     filesystem::path dirPath = "."; // Путь к директории
     string table_name = take_string(line, i); // Получаем имя таблицы
@@ -681,11 +683,11 @@ void deleting(string& line, int& i, HashTable<List<string>>& tables, string& sch
         cmp.push(true); // Изначально все строки считаем подходящими для удаления
     }
 
-    string logi = "AND"; // Логический оператор по умолчанию
+    string logOperator = "AND"; // Логический оператор по умолчанию
 
     // Проверяем наличие условий WHERE
     if (take_string(line, i) == "WHERE") {
-        where_select(line, i, logi, headers, table, cmp); // Обрабатываем условия
+        where_select(line, i, logOperator, headers, table, cmp); // Обрабатываем условия
     }
 
     List<List<string>> result; // Список для хранения результата
@@ -768,4 +770,3 @@ void console_parse(string& schem_name, HashTable<List<string>>& tables, List<str
         }
     }
 }
-
