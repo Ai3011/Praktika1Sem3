@@ -14,8 +14,8 @@ struct NodeD {
 template <typename T>
 struct List {
     int length = 0;                  // Количество элементов в списке
-    NodeD<T>* head = new NodeD<T>;    // Указатель на первый элемент (фиктивный узел)
-    NodeD<T>* tail = head;            // Указатель на последний элемент
+    NodeD<T>* head = new NodeD<T>;    // Указатель на первый 
+    NodeD<T>* tail = head;            // Указатель на последний 
 
     // Добавление элемента в конец списка
     void push(T data) {
@@ -138,84 +138,7 @@ struct List {
             delete tek;
             tek = prev;
         }
-        delete tek;  // Удаляем фиктивный узел
-    }
-};
-
-// Одномерный массив
-template <typename T>
-struct Array {
-    struct Node {
-        T value;
-        bool state = false;  // Состояние: занято или нет
-    };
-    int arSize;
-    Node* head;
-
-    // Конструктор массива
-    Array(int size) {
-        arSize = size;
-        head = new Node[size];
-    }
-
-    // Установка значения по индексу
-    void set(T data, int index) {
-        if (index >= arSize) {
-            throw runtime_error("Out of range");  // Ошибка, если индекс некорректный
-        }
-        head[index].value = data;
-        head[index].state = true;  // Устанавливаем флаг, что элемент активен
-    }
-
-    // Перегрузка оператора [], получение значения по индексу
-    T operator[](int index) {
-        if (index >= arSize) {
-            throw runtime_error("Out of range");
-        }
-        if (!head[index].state) {
-            throw runtime_error("No value");
-        }
-        return head[index].value;
-    }
-
-    // Удаление значения по индексу
-    void del(int index) {
-        if (index >= arSize) {
-            throw runtime_error("Out of range");
-        }
-        if (!head[index].state) {
-            throw runtime_error("No value");
-        }
-        head[index].state = false;  // Сбрасываем флаг активности
-    }
-
-    // Поиск элемента
-    int find(T data) {
-        for (int i = 0; i < arSize; i++) {
-            if (!head[i].state) {
-                continue;
-            }
-
-            if (head[i].value == data) {
-                return i;  // Возвращаем индекс найденного элемента
-            }
-        }
-
-        return -1;  // Если элемент не найден
-    }
-
-    // Удаление элемента по значению
-    void remove(T data) {
-        int index = find(data);
-        if (index == -1) {
-            throw runtime_error("No value");
-        }
-        head[index].state = false;
-    }
-
-    // Деструктор массива
-    ~Array() {
-        delete[] head;
+        delete tek;  // Удаляем  узел
     }
 };
 
@@ -225,7 +148,7 @@ struct NodeH {
     string key;
     T value;
     bool state = false;  // Состояние: занято или нет
-    bool deleted = false;  // Флаг, указывающий на удаление
+    bool deleted = false;  // Состояние, указывающий на удаление
 };
 
 // Хеш-таблица
@@ -252,7 +175,7 @@ struct HashTable {
     void Add(string key, T value) {
         int index = hashFunc(key);
 
-        while (index < size) {
+        while (index < size) {  //  Коллизии
             if (!arr[index].state) {
                 arr[index].key = key;
                 arr[index].value = value;
