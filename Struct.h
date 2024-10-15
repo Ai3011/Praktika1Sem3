@@ -243,8 +243,7 @@ struct HashTable {
     int hashFunc(string key) {
         int hash_result = 0;
         for (int i = 0; i < key.size(); i++) {
-            hash_result = ((size - 1) * hash_result + key[i]) % size;
-            hash_result = (hash_result * 2 + 1) % size;
+            hash_result = (31 * hash_result + key[i]) % size;
         }
         return hash_result;
     }
